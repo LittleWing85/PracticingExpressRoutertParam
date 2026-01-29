@@ -31,7 +31,15 @@ let nextSpiceId = 5;
 
 app.use(bodyParser.json());
 
-// Add your code here:
+app.param("spiceId", (req, res, next, id) => {
+    const spiceId = Number(id);
+    const spiceIndex = spiceRack.findIndex((spice) => spice.id === spiceId);
+    if (spiceIndex > -1) {
+        req.spiceIndex = spiceIndex;
+        return next();
+    }
+    res.status(404).send();
+});
 
 app.get("/spices", (req, res, next) => {
     res.send(spiceRack);
@@ -49,35 +57,17 @@ app.post("/spices", (req, res, next) => {
 });
 
 app.get("/spices/:spiceId", (req, res, next) => {
-    const spiceId = Number(req.params.id);
-    const spiceIndex = spiceRack.findIndex((spice) => spice.id === spiceId);
-    if (spiceIndex !== -1) {
-        res.send(spiceRack[spiceIndex]);
-    } else {
-        res.status(404).send("Spice not found.");
-    }
+    res.send(spiceRack[req.spiceIndex]);
 });
 
 app.put("/spices/:spiceId", (req, res, next) => {
-    const spiceId = Number(req.params.id);
-    const spiceIndex = spiceRack.findIndex((spice) => spice.id === spiceId);
-    if (spiceIndex !== -1) {
-        spiceRack[spiceIndex] = req.body.spice;
-        res.send(spiceRack[spiceIndex]);
-    } else {
-        res.status(404).send("Spice not found.");
-    }
+    spiceRack[req.spiceIndex] = req.body.spice;
+    res.send(spiceRack[req.spiceIndex]);
 });
 
 app.delete("/spices/:spiceId", (req, res, next) => {
-    const spiceId = Number(req.params.id);
-    const spiceIndex = spiceRack.findIndex((spice) => spice.id === spiceId);
-    if (spiceIndex !== -1) {
-        spiceRack.splice(spiceIndex, 1);
-        res.status(204).send();
-    } else {
-        res.status(404).send("Spice not found.");
-    }
+    spiceRack.splice(req.spiceIndex, 1);
+    res.status(204).send();
 });
 
 // export app for use in main.js and for testing
